@@ -6,7 +6,20 @@ public class JoinNeighborNode extends Node
 
     public JoinNeighborNode(Node _mainNode)
     {
-        super(NodeType.JOIN_NEIGHBOR, NodeStatus.NONE);
+        type = NodeType.JOIN_NEIGHBOR;
+        status = NodeStatus.NONE;
         mainNode = _mainNode;
+    }
+
+    // Checks if a node is replacable.
+    public boolean IsReplaceable ()
+    {
+        JoinMainNode main = (JoinMainNode) mainNode; // get main node from neighbor
+        if (main.neighbor2.get() == FlagNode.ABORTED || main.neighbor2.get() == FlagNode.DONE)
+        {
+            return true;
+        }
+
+        return false;
     }
 }

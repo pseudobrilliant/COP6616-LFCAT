@@ -11,13 +11,14 @@ public class LFCAT <T extends Comparable<T>>
 
     public LFCAT()
     {
-        root.set(new BaseNode<T>());
+        root = new AtomicReference<Node>();
+        Node node = (Node) new BaseNode<T>();
+        root.set(node);
     }
-
 
     public boolean Insert(int key, T x)
     {
-        return DoUpdate(Operation.INSERT, x);
+        return DoUpdate(Operation.INSERT, key, x);
     }
 
     public boolean Remove(int key)
@@ -28,22 +29,22 @@ public class LFCAT <T extends Comparable<T>>
     public boolean Lookup(int key, T x)
     {
         BaseNode<T> base = (BaseNode<T>) Node.FindBaseNode(root.get(), key);
-        return base.Contains(x);
+        return base.DataContains(x);
     }
 
     private boolean DoUpdate(Operation op, int key, T x)
     {
-        ContentionInfo cnt_info = ContentionInfo.UNCONTENED;
+        ContentionInfo cnt_info = ContentionInfo.UNCONTESTED;
 
         while(true)
         {
-            Node base = Node.FindBaseNode(root.get(), key);
+            BaseNode<T> base = (BaseNode<T>)Node.FindBaseNode(root.get(), key);
 
-            if(Node.IsReplaceable(base))
+            if(base.IsReplaceable())
             {
                 boolean res = false;
 
-                BaseNode<T> newb = new BaseNode<T>();
+                BaseNode<T> newb = new BaseNode<T>(base.data);
                 newb.parent = base.parent;
 
                 if(op == Operation.INSERT)
@@ -56,17 +57,17 @@ public class LFCAT <T extends Comparable<T>>
                     res = newb.DataRemove(x);
                 }
 
-                newb.statistic = Node.NewStat(base, cnt_info);
+                newb.statistic = base.NewStat(cnt_info);
 
                 if(Node.TryReplace(root, base, newb))
                 {
-                    Node.AdaptIfNeeded(root, newb);
+                    newb.AdaptIfNeeded(root);
                     return res;
                 }
             }
 
-            cnt_info = ContentionInfo.CONTENDED;
-            this.HelpIfNeeded(base)
+            cnt_info = ContentionInfo.CONTESTED;
+            this.HelpIfNeeded(base);
         }
     }
 
@@ -80,11 +81,11 @@ public class LFCAT <T extends Comparable<T>>
         }
         if(temp.type == NodeType.JOIN_MAIN)
         {
-            if (((JoinMainNode) temp).neighbor2.get() == Node.PREPARING)
+            if (((JoinMainNode) temp).neighbor2.get() == FlagNode.PREPARING)
             {
-                ((JoinMainNode) temp).neighbor2.compareAndSet(Node.PREPARING,Node.ABORTED);
+                ((JoinMainNode) temp).neighbor2.compareAndSet(FlagNode.PREPARING,FlagNode.ABORTED);
             }
-            else if(((JoinMainNode) temp).neighbor2.get() == Node.NEEDS_HELP)
+            else if(((JoinMainNode) temp).neighbor2.get() == FlagNode.NEEDS_HELP)
             {
                 //TODO: complete merge
             }

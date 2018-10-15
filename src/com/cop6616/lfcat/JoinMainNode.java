@@ -11,7 +11,15 @@ public class JoinMainNode extends Node
 
     public JoinMainNode()
     {
-        super(NodeType.JOIN_MAIN);
-        neighbor2.set(Node.PREPARING);
+        type = NodeType.JOIN_MAIN;
+        status = NodeStatus.NONE;
+        neighbor2.set(FlagNode.PREPARING);
     }
+
+    // Checks if a node is replacable.
+    public boolean IsReplaceable ()
+    {
+        return (neighbor2.get() == FlagNode.ABORTED);  // Check status of neighbor2
+    }
+
 }

@@ -14,13 +14,16 @@ public class RouteNode extends Node
 
     public RouteNode()
     {
-        super(NodeType.ROUTE);
+        type = NodeType.ROUTE;
+        status = NodeStatus.NONE;
         valid.set(true);
     }
 
     public RouteNode(int _key, Node _left, Node _right)
     {
-        super(NodeType.ROUTE);
+        type = NodeType.ROUTE;
+
+        status = NodeStatus.NONE;
 
         valid.set(true);
 
@@ -28,7 +31,11 @@ public class RouteNode extends Node
 
         left.set(_left);
         right.set(_right);
+    }
 
+    public boolean IsReplaceable()
+    {
+        return false;
     }
 
 }
