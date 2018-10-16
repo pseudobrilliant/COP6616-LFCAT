@@ -28,7 +28,7 @@ public class Treap<T> implements IList<T> {
 
     private static int randomSeed = Integer.MAX_VALUE; // This should be at least twice the number of Nodes
 
-    protected Node<T> root = null;
+    private Node<T> root = null;
     protected int size = 0;
 
     /**
@@ -36,9 +36,16 @@ public class Treap<T> implements IList<T> {
      */
     public Treap() { }
 
+    // Constructor from a Node<T>
     public Treap(Node<T> _root)
     {
-        root = _root;
+        this.inOrderCopy(_root);
+    }
+
+    // Copy constructor
+    public Treap(Treap<T> t)
+    {
+        this.inOrderCopy(t.getRoot());
     }
 
     /**
@@ -409,6 +416,10 @@ public class Treap<T> implements IList<T> {
         }
     }
 
+    public Node<T> getRoot() {
+        return this.root;
+    }
+
     private static <T> int getIndexByValue(Node<T> node, int parentIndex, T value) {
         if (node == null)
             return Integer.MIN_VALUE;
@@ -454,6 +465,7 @@ public class Treap<T> implements IList<T> {
         return data;
     }
 
+
     private static <T> int inOrder(Node<T> node, T[] data, int idx) {
         if (node == null)
             return idx;
@@ -462,6 +474,17 @@ public class Treap<T> implements IList<T> {
         data[idx++] = node.value;
         idx = inOrder(node.right, data, idx);
         return idx;
+    }
+
+    private void inOrderCopy(Node<T> node) {
+        if (node == null)
+            return;
+
+        this.inOrderCopy(node.left);
+        this.add(node.value);
+        this.inOrderCopy(node.right);
+
+        return;
     }
 
     /**

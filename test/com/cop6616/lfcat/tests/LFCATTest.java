@@ -7,13 +7,15 @@ import java.util.Vector;
 
 public class LFCATTest
 {
-    private static final int NUM_THREADS = 10;
+    private static final int NUM_THREADS = 5;
 
     @Test
     void ConcurLFCATInsertTest() throws Exception
     {
 
         LFCAT<Integer> lfcat = new LFCAT<Integer>();
+
+        lfcat.Insert(NUM_THREADS * 5, NUM_THREADS * 5);
 
         Vector<Thread> threads = new Vector<Thread>();
 

@@ -18,7 +18,7 @@ public class BaseNode<T extends Comparable<T>> extends Node
     public BaseNode(Treap<T> _data)
     {
         type = NodeType.NORMAL;
-        data = _data;
+        data = new Treap<T>(_data.getRoot());
     }
 
     public boolean DataInsert(T x)
@@ -67,14 +67,12 @@ public class BaseNode<T extends Comparable<T>> extends Node
 
     // Splits a treap if there is high contention
     public void SplitAdaptation(AtomicReference<Node> m)
-    {/*
-        if(DataCount() > 2)
+    {
+        if(DataCount() >= 2) // Should this be >= 2 instead?
         {
             int split_key = data.getRootKey();
 
             System.out.println(split_key);
-
-            System.out.println(data.toString());
 
             Treap.Pair<T> pair = data.split(split_key);
 
@@ -84,8 +82,6 @@ public class BaseNode<T extends Comparable<T>> extends Node
 
             BaseNode<T> right = new BaseNode<T>(new Treap<T>(pair.getGreater()));
 
-            System.out.println(right.data.toString());
-
             RouteNode r = new RouteNode(split_key, left, right);
 
             left.parent = r;
@@ -93,7 +89,7 @@ public class BaseNode<T extends Comparable<T>> extends Node
             right.parent = r;
 
             Node.TryReplace(m, this, r);
-        }*/
+        }
     }
 
     // Joins a node with its right-hand neighbor if there is low contention

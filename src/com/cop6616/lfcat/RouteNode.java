@@ -7,10 +7,10 @@ public class RouteNode extends Node
 {
     int key;
 
-    AtomicReference<Node> left;
-    AtomicReference<Node> right;
+    AtomicReference<Node> left = new AtomicReference<Node>();
+    AtomicReference<Node> right = new AtomicReference<Node>();
     AtomicReference<Node> joinID;
-    AtomicBoolean valid;
+    AtomicBoolean valid = new AtomicBoolean();
 
     public RouteNode()
     {
