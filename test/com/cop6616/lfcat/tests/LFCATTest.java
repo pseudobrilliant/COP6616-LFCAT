@@ -15,11 +15,9 @@ public class LFCATTest
 
         LFCAT<Integer> lfcat = new LFCAT<Integer>();
 
-        lfcat.Insert(NUM_THREADS * 5, NUM_THREADS * 5);
-
         Vector<Thread> threads = new Vector<Thread>();
 
-        int range = 10;
+        int range = 100;
 
         for(int i=0; i < NUM_THREADS; i++)
         {
@@ -57,7 +55,7 @@ public class LFCATTest
         {
             for(int i = start; i < range + start; i ++)
             {
-                lfcat.Insert(i, i);
+                lfcat.Insert(i);
             }
         }
     }

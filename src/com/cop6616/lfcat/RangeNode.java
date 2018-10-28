@@ -1,12 +1,28 @@
 package com.cop6616.lfcat;
 
+import com.jwetherell.algorithms.data_structures.AVLTree;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RangeNode<T extends Comparable<T>> extends Node
+public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
 {
+    public class ResultStorage<U extends Comparable<U>>
+    {
+        AtomicReference<AVLTree<U>>  result;
+        AtomicBoolean moreThanOneBase;
+
+        public ResultStorage()
+        {
+            moreThanOneBase.set(false);
+        }
+    }
+
     int lokey;
     int hikey;
-    //TODO: Result Storage
+    ResultStorage<T> storage;
 
     private static final int RANGE_CONTRIB = 100;
 
@@ -16,10 +32,28 @@ public class RangeNode<T extends Comparable<T>> extends Node
         status = NodeStatus.NONE;
     }
 
-    public RangeNode(int lokey, int hikey)
+    public RangeNode(Node _node, int _lokey, int _hikey, ResultStorage<T> _str)
     {
         type = NodeType.RANGE;
         status = NodeStatus.NONE;
+
+        parent = _node.parent;
+        statistic = _node.statistic;
+
+        if(_node.type == NodeType.RANGE || _node.type == NodeType.NORMAL)
+        {
+            BaseNode<T> bn = (BaseNode<T>) _node;
+            data = bn.data;
+        }
+        else
+        {
+            data =new AVLTree<T>();
+        }
+
+        lokey = _lokey;
+        hikey = _hikey;
+
+        storage = _str;
     }
 
     public boolean IsReplaceable()
@@ -46,18 +80,179 @@ public class RangeNode<T extends Comparable<T>> extends Node
         return stat;
     }
 
-    public static boolean AllInRange(AtomicReference<Node> root, int low, int key)
+    public static void CopyStateTo(Deque<Node> orig, Deque<Node> target)
     {
-        /*Given a range to find, the Range query operation traverses the structure while saving the traversal in stacks
-        and marking relevant nodes as part of the Range Query. The operation begins by traversing the LFCAT structure to
-        find the Base node containing the low key in the range. The low Base node, and the parent used to reach it in the
-        stack, are marked as part of the Range Query by CAS replacing their nodes with Range node copies. This Base node
-        is tracked in a stack of visited nodes that are know to be part of the range. Starting from this Base node this
-        operation is repeated on the subsequent furthest left nodes that have yet to be visited. When a Base node that
-        contains or exceeds the high range key is reached then we have completed our full list of required base nodes,
-        and marked them and their parent as part of the range query. The stack of verified nodes is then traversed in
-        stack order in order to join each treap into one result set. */
+        target.clear();
 
-        return false;
+        for (Node n : orig)
+        {
+            target.push(n);
+        }
+    }
+
+    public AVLTree<T> AllInRange(AtomicReference<Node> m, int lowKey, int highKey, ResultStorage<T> rs) //TODO: Add Result Set
+    {
+        Deque<Node> done = new ArrayDeque<Node>();
+        Deque<Node> s = new ArrayDeque<Node>();
+        Deque<Node> backup_s = new ArrayDeque<Node>();
+        ResultStorage mys;
+        Node b;
+        while(true)
+        {
+            done.clear();
+            s.clear();
+            backup_s.clear();
+            b = FindBaseStack(m.get(), lowKey, s);
+            mys = null;
+            if (rs != null)
+            {
+                if (b.type != NodeType.RANGE)
+                {
+                    return rs.result.get();
+                }
+                else
+                {
+                    RangeNode<T> brn = (RangeNode<T>) b;
+                    if (brn.storage != rs)
+                    {
+                        return rs.result.get();
+                    }
+                    else
+                    {
+                        mys = rs;
+                    }
+                }
+            }
+            else if (!b.IsReplaceable())
+            {
+                mys = new ResultStorage();
+                RangeNode<T> n = new RangeNode<T>(b, lowKey, highKey, mys);
+
+                if (!TryReplace(m, b, n))
+                {
+                    continue;
+                }
+
+                ReplaceTop(s, n);
+            }
+            else if (b.type == NodeType.RANGE && ((RangeNode<T>) b).hikey >= hikey)
+            {
+                RangeNode<T> brn = (RangeNode<T>) b;
+                return AllInRange(m, brn.lokey, brn.hikey, brn.storage);
+            }
+            else
+            {
+                //
+                continue;
+            }
+        }
+
+        while(true)
+        {
+            done.push(b);
+            CopyStateTo(s,backup_s);
+
+            RangeNode<T> brn = (RangeNode<T>) b;
+
+            if(brn.data.isEmpty() && (Integer)brn.data.max() >= highKey)
+            {
+                break;
+            }
+
+            b = FindNextBaseStack(s);
+
+            if(b == null)
+            {
+                break;
+            }
+            else if(mys.result.get() != null)
+            {
+                return (AVLTree<T>)mys.result.get();
+            }
+            else if(b.type == NodeType.RANGE && ((RangeNode)b).storage ==mys)
+            {
+                continue;
+            }
+            else if(b.IsReplaceable())
+            {
+                RangeNode<T> nr = new RangeNode<>(b,lowKey,highKey,mys);
+                if(TryReplace(m,b,nr))
+                {
+                    ReplaceTop(s,nr);
+                }
+                else
+                {
+
+                }
+            }
+        }
+    }
+
+    public Node FindBaseStack(Node n, int key, Deque<Node> s)
+    {
+        Node temp = n;
+
+        while(temp.type == NodeType.ROUTE)
+        {
+            s.push(n);
+
+            if(key < ((RouteNode) temp).key)
+            {
+                temp = ((RouteNode) temp).left.get();
+            }
+            else
+            {
+                temp = ((RouteNode) temp).right.get();
+            }
+        }
+
+        s.push(n);
+
+        return n;
+    }
+
+    public Node FindNextBaseStack(Deque<Node> s)
+    {
+        RouteNode b = (RouteNode)s.pop();
+        RouteNode t = (RouteNode)s.getFirst();
+
+        if(t == null)
+        {
+            return null;
+        }
+
+        if(t.type == NodeType.ROUTE && t.left.get() == b)
+        {
+            return LeftmostStack(t.right.get(), s);
+        }
+
+        int target = t.key;
+
+        while(t != null)
+        {
+            if(t.valid.get() && t.key > target)
+            {
+                return LeftmostStack(t.right.get(), s);
+            }
+            else
+            {
+                s.pop();
+                t = (RouteNode)s.getFirst();
+            }
+        }
+
+        return null;
+    }
+
+    public Node LeftmostStack(Node b, Deque<Node> s)
+    {
+        Node n = b;
+        while(n.type == NodeType.ROUTE)
+        {
+            s.push(n);
+            n = ((RouteNode)n).left.get();
+        }
+
+        return n;
     }
 }

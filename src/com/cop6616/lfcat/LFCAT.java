@@ -16,29 +16,36 @@ public class LFCAT <T extends Comparable<T>>
         root.set(node);
     }
 
-    public boolean Insert(int key, T x)
+    public boolean Insert(T x)
     {
-        return DoUpdate(Operation.INSERT, key, x);
+        return DoUpdate(Operation.INSERT, x);
     }
 
-    public boolean Remove(int key)
+    public boolean Remove(T x)
     {
-        return DoUpdate(Operation.REMOVE, key, null);
+        return DoUpdate(Operation.REMOVE, x);
     }
 
-    public boolean Lookup(int key, T x)
+    public boolean Lookup(T x)
     {
-        BaseNode<T> base = (BaseNode<T>) Node.FindBaseNode(root.get(), key);
+        BaseNode<T> base = (BaseNode<T>) Node.FindBaseNode(root.get(), (Integer)x);
         return base.DataContains(x);
     }
 
-    private boolean DoUpdate(Operation op, int key, T x)
+    public boolean RangeQuery(/* low, high, ?? */)
+    {
+        // TODO: implement RangeQuery
+        return false;
+    }
+
+    private boolean DoUpdate(Operation op, T x)
     {
         ContentionInfo cnt_info = ContentionInfo.UNCONTESTED;
+        int key = (Integer) x;
 
         while(true)
         {
-            BaseNode<T> base = (BaseNode<T>)Node.FindBaseNode(root.get(), key);
+            BaseNode<T> base = (BaseNode<T>)Node.FindBaseNode(root.get(), (Integer)key);
 
             if(base.IsReplaceable())
             {

@@ -1,24 +1,24 @@
 package com.cop6616.lfcat;
 
-import com.jwetherell.algorithms.data_structures.Treap;
+import com.jwetherell.algorithms.data_structures.AVLTree;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 public class BaseNode<T extends Comparable<T>> extends Node
 {
-    Treap<T> data;
+    AVLTree<T> data;
 
     public BaseNode()
     {
         type = NodeType.NORMAL;
         status = NodeStatus.NONE;
-        data = new Treap<T>();
+        data = new AVLTree<T>();
     }
 
-    public BaseNode(Treap<T> _data)
+    public BaseNode(AVLTree<T> _data)
     {
         type = NodeType.NORMAL;
-        data = new Treap<T>(_data.getRoot());
+        data = new AVLTree<T>(_data);
     }
 
     public boolean DataInsert(T x)
@@ -28,7 +28,7 @@ public class BaseNode<T extends Comparable<T>> extends Node
 
     public boolean DataRemove(T x)
     {
-        return data.remove(x);
+        return data.remove(x) == x;
     }
 
     public boolean DataContains(T x)
@@ -70,17 +70,15 @@ public class BaseNode<T extends Comparable<T>> extends Node
     {
         if(DataCount() >= 2) // Should this be >= 2 instead?
         {
-            int split_key = data.getRootKey();
+            int split_key = (Integer) data.getSplitKey();
 
-            System.out.println(split_key);
+            AVLTree.Pair<T> pair = data.split();
 
-            Treap.Pair<T> pair = data.split(split_key);
-
-            BaseNode<T> left = new BaseNode<T>(new Treap<T>(pair.getLesser()));
+            BaseNode<T> left = new BaseNode<T>(pair.getLesser());
 
             System.out.println(left.data.toString());
 
-            BaseNode<T> right = new BaseNode<T>(new Treap<T>(pair.getGreater()));
+            BaseNode<T> right = new BaseNode<T>(pair.getGreater());
 
             RouteNode r = new RouteNode(split_key, left, right);
 
