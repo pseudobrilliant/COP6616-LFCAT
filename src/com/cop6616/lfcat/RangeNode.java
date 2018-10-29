@@ -159,7 +159,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
 
     public AVLTree<T> RestInRange(AtomicReference<Node> m, int lowKey, int highKey, Node b,
                                   Deque<Node> s, Deque<Node> backup_s, Deque<Node> done,
-                                  ResultStorage<T> mys)
+                                  ResultStorage<T> rs)
     {
         while(true)
         {
@@ -173,30 +173,36 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
                 break;
             }
 
-            b = FindNextBaseStack(s);
+            RestInRangeSearch(m, lowKey,highKey, s, backup_s, done, rs);
+        }
+    }
 
-            if(b == null)
+    public AVLTree<T> RestInRangeSearch(AtomicReference<Node> m, int lowKey, int highKey,
+                                  Deque<Node> s, Deque<Node> backup_s, Deque<Node> done,
+                                  ResultStorage<T> rs)
+    {
+        Node b = FindNextBaseStack(s);
+
+        if(b != null) {
+            if (rs.result.get() != null)
             {
-                break;
+                return (AVLTree<T>) rs.result.get();
             }
-            else if(mys.result.get() != null)
+            else if (b.type == NodeType.RANGE && ((RangeNode) b).storage == rs)
             {
-                return (AVLTree<T>)mys.result.get();
+                return RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
             }
-            else if(b.type == NodeType.RANGE && ((RangeNode)b).storage ==mys)
+            else if (b.IsReplaceable())
             {
-                continue;
-            }
-            else if(b.IsReplaceable())
-            {
-                RangeNode<T> nr = new RangeNode<>(b,lowKey,highKey,mys);
-                if(TryReplace(m,b,nr))
+                RangeNode<T> nr = new RangeNode<>(b, lowKey, highKey, rs);
+                if (TryReplace(m, b, nr))
                 {
-                    ReplaceTop(s,nr);
+                    ReplaceTop(s, nr);
                 }
                 else
                 {
-
+                    CopyStateTo(backup_s, s);
+                    RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
                 }
             }
         }
