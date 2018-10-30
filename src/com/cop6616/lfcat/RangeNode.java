@@ -2,8 +2,10 @@ package com.cop6616.lfcat;
 
 import com.jwetherell.algorithms.data_structures.AVLTree;
 
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -183,7 +185,8 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
     {
         Node b = FindNextBaseStack(s);
 
-        if(b != null) {
+        if(b != null)
+        {
             if (rs.result.get() != null)
             {
                 return (AVLTree<T>) rs.result.get();
@@ -202,10 +205,45 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
                 else
                 {
                     CopyStateTo(backup_s, s);
-                    RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
+                    return RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
                 }
             }
+            else
+            {
+                //TODO: help if needed
+                CopyStateTo(backup_s, s);
+                return RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
+            }
         }
+    }
+
+    public AVLTree<T> CompleteRangeSearch(AtomicReference<Node> m, int lowKey, int highKey,
+                                        Deque<Node> s, Deque<Node> backup_s, Deque<Node> done,
+                                        ResultStorage<T> rs)
+    {
+        Object[] arr = done.toArray();
+
+        AVLTree<T> avl = null;
+
+        for(Object r: arr)
+        {
+            BaseNode<T> rn = (BaseNode<T>) r;
+            if(avl == null)
+            {
+                avl = rn.data;
+            }
+            else
+            {
+                avl.join(rn.data);
+            }
+        }
+
+        if(rs.result.compareAndSet(null, avl) && done.size() > 1)
+        {
+            rs.moreThanOneBase.set(true);
+        }
+        AdaptIfNeeded(m);
+        return rs.result.get();
     }
 
     public Node FindBaseStack(Node n, int key, Deque<Node> s)
