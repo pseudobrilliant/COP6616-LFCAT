@@ -1,7 +1,5 @@
 package com.cop6616.lfcat;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 enum ContentionInfo
 {
     CONTESTED,
@@ -44,6 +42,10 @@ public abstract class Node
 
     public abstract boolean IsReplaceable();
 
+    public abstract void Print();
+
+    public abstract int Size();
+
     public int NewStat(ContentionInfo cnt)
     {
         int stat = statistic;
@@ -53,7 +55,7 @@ public abstract class Node
             stat = statistic + HIGH_CONT_CONTRB;
         }
         else
-        if(cnt == ContentionInfo.UNCONTESTED && statistic >= LOW_CONT)
+        if(cnt == ContentionInfo.UNCONTESTED && statistic >= Node.LOW_CONT)
         {
             stat = statistic - LOW_CONT_CONTRB;
         }

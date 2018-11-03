@@ -105,7 +105,7 @@ public class Util
 
         while(temp.type == NodeType.ROUTE)
         {
-            s.push(n);
+            s.push(temp);
 
             if(key < ((RouteNode) temp).key)
             {
@@ -117,14 +117,14 @@ public class Util
             }
         }
 
-        s.push(n);
+        s.push(temp);
 
-        return n;
+        return temp;
     }
 
     public static Node FindNextBaseStack(Deque<Node> s)
     {
-        RouteNode b = (RouteNode)s.pop();
+        Node b = s.pop();
         RouteNode t = (RouteNode)s.getFirst();
 
         if(t == null)

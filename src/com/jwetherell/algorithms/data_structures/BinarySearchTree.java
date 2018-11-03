@@ -283,6 +283,23 @@ public class BinarySearchTree<T extends Comparable<T>> implements ITree<T> {
         return lesser;
     }
 
+    public T min()
+    {
+        Node<T> l = getLeast(root);
+
+        if(l == null)
+        {
+            if(root != null)
+            {
+                return root.id;
+            }
+
+            return null;
+        }
+
+        return l.id;
+    }
+
     /**
      * {@inheritDoc}
      */

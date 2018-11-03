@@ -36,6 +36,8 @@ public class InsertTest
             threads.elementAt(i).join();
         }
 
+        lfcat.Print();
+
         Assert.assertEquals(range * NUM_THREADS, lfcat.Size());
     }
 

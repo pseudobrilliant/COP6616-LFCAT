@@ -56,7 +56,7 @@ public class BaseNode<T extends Comparable<T>> extends Node
 
         if(NewStat(ContentionInfo.NOINFO) > HIGH_CONT)
         {
-            SplitAdaptation(m);
+            SplitAdaptation(m, this);
         }
         else if(NewStat(ContentionInfo.NOINFO) < LOW_CONT)
         {
@@ -66,17 +66,15 @@ public class BaseNode<T extends Comparable<T>> extends Node
     }
 
     // Splits a treap if there is high contention
-    public void SplitAdaptation(AtomicReference<Node> m)
+    public static <T extends Comparable<T>> void SplitAdaptation(AtomicReference<Node> m, BaseNode b)
     {
-        if(DataCount() >= 2) // Should this be >= 2 instead?
+        if(b.DataCount() >= 2)
         {
-            int split_key = (Integer) data.getSplitKey();
+            int split_key = (Integer) b.data.getSplitKey();
 
-            AVLTree.Pair<T> pair = data.split();
+            AVLTree.Pair<T> pair = b.data.split();
 
             BaseNode<T> left = new BaseNode<T>(pair.getLesser());
-
-            System.out.println(left.data.toString());
 
             BaseNode<T> right = new BaseNode<T>(pair.getGreater());
 
@@ -86,12 +84,17 @@ public class BaseNode<T extends Comparable<T>> extends Node
 
             right.parent = r;
 
-            Util.TryReplace(m, this, r);
+            Util.TryReplace(m, b, r);
         }
     }
 
+    public int Size()
+    {
+        return data.size();
+    }
+
     // Joins a node with its right- 0r left-hand neighbor if there is low contention
-    public void JoinAdaptation(AtomicReference<Node> root, Node b)
+    public static <T extends Comparable<T>> void JoinAdaptation(AtomicReference<Node> root, Node b)
     {
         /*
         if(b.parent == null)
@@ -117,4 +120,12 @@ public class BaseNode<T extends Comparable<T>> extends Node
         }*/
     }
 
+    public void Print()
+    {
+        int size = data.size();
+        int min = (Integer)data.min();
+        Integer max = (Integer)data.max();
+
+        System.out.println("Base Node - Size: " + size +" Min: " + min + " Max: " + max );
+    }
 }

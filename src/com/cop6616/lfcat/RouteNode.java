@@ -38,4 +38,29 @@ public class RouteNode extends Node
         return false;
     }
 
+    public void Print()
+    {
+        System.out.println("Route Node - Key: " + key);
+        System.out.print(" Left: ");
+        left.get().Print();
+        System.out.print(" Right: ");
+        right.get().Print();
+    }
+
+    public int Size()
+    {
+        int size = 0;
+
+        if(left != null)
+        {
+            size += left.get().Size();
+        }
+
+        if(right != null)
+        {
+            size += right.get().Size();
+        }
+
+        return size;
+    }
 }

@@ -2,8 +2,6 @@ package com.cop6616.lfcat;
 
 import com.jwetherell.algorithms.data_structures.AVLTree;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -108,33 +106,14 @@ public class LFCAT <T extends Comparable<T>>
         return true; // default value
     }
 
-    //NON-CONCURRENT
-    public int Size()
+    public void Print()
     {
-        return GetSize(root.get(), 0);
+        root.get().Print();
     }
 
-    private int GetSize(Node n, int size)
+    //Non-Concurrent
+    public int Size()
     {
-        if(n.type == NodeType.ROUTE)
-        {
-            RouteNode r = (RouteNode)n;
-            if(r.left != null)
-            {
-                size += GetSize(r.left.get(), size);
-            }
-
-            if(r.right != null)
-            {
-                size += GetSize(r.right.get(), size);
-            }
-        }
-        else
-        {
-            BaseNode<T> b = (BaseNode<T>) n;
-            return b.data.size();
-        }
-
-        return size;
+        return root.get().Size();
     }
 }

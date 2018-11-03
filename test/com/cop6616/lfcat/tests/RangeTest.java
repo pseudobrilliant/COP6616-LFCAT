@@ -1,6 +1,7 @@
 package com.cop6616.lfcat.tests;
 
 import com.cop6616.lfcat.LFCAT;
+import com.jwetherell.algorithms.data_structures.AVLTree;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +9,7 @@ import java.util.Vector;
 
 public class RangeTest
 {
-    private static final int NUM_THREADS = 5;
+    private static final int NUM_THREADS = 2;
 
     LFCAT<Integer> lfcat;
 
@@ -31,26 +32,32 @@ public class RangeTest
     {
 
         Vector<Thread> threads = new Vector<Thread>();
+        Vector<ConcurRangeTestThread> rangeTests = new Vector<ConcurRangeTestThread>();
 
-        int range = 100;
+        int range = 10;
 
         for(int i=0; i < NUM_THREADS; i++)
         {
-            ConcurRangeTestThread r = new ConcurRangeTestThread(i,i+range, lfcat);
+            ConcurRangeTestThread r = new ConcurRangeTestThread(i* range,range, lfcat);
 
             Thread t = new Thread(r);
 
             t.start();
 
             threads.add(t);
+
+            rangeTests.add(r);
         }
 
         for(int i=0; i < NUM_THREADS; i++)
         {
             threads.elementAt(i).join();
-        }
 
-        Assert.assertEquals(range * NUM_THREADS, lfcat.Size());
+            if(!rangeTests.elementAt(i).pass)
+            {
+                Assert.fail();
+            }
+        }
     }
 
 
@@ -59,7 +66,7 @@ public class RangeTest
         LFCAT<Integer> lfcat;
         int start = 0;
         int range =0;
-        boolean pass = false;
+        boolean pass = true;
 
         ConcurRangeTestThread(int _start, int _range, LFCAT<Integer> _lfcat)
         {
@@ -71,7 +78,15 @@ public class RangeTest
         @Override
         public void run()
         {
-            lfcat.RangeQuery(start, range);
+            AVLTree<Integer> tree = lfcat.RangeQuery(start, start + range);
+
+            for(int i = start; i < start + range; i++)
+            {
+                if(tree == null || !tree.contains(i))
+                {
+                   pass = false;
+                }
+            }
         }
     }
 }
