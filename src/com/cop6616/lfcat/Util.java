@@ -125,12 +125,14 @@ public class Util
     public static Node FindNextBaseStack(Deque<Node> s)
     {
         Node b = s.pop();
+
+        if(s.isEmpty())
+        {
+            return b;
+        }
+
         RouteNode t = (RouteNode)s.getFirst();
 
-        if(t == null)
-        {
-            return null;
-        }
 
         if(t.type == NodeType.ROUTE && t.left.get() == b)
         {
@@ -148,7 +150,21 @@ public class Util
             else
             {
                 s.pop();
-                t = (RouteNode)s.getFirst();
+                if(s.isEmpty())
+                {
+                    t = null;
+                }
+                else
+                {
+                    if(t.type == NodeType.ROUTE)
+                    {
+                        t = (RouteNode) s.getFirst();
+                    }
+                    else
+                    {
+                        return s.getFirst();
+                    }
+                }
             }
         }
 
@@ -166,4 +182,5 @@ public class Util
 
         return n;
     }
+
 }

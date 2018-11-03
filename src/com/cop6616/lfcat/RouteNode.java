@@ -38,6 +38,8 @@ public class RouteNode extends Node
         return false;
     }
 
+    public void HelpIfNeeded(AtomicReference<Node> m){return;}
+
     public void Print()
     {
         System.out.println("Route Node - Key: " + key);

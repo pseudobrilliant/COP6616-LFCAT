@@ -9,7 +9,7 @@ import java.util.Vector;
 
 public class RangeTest
 {
-    private static final int NUM_THREADS = 2;
+    private static final int NUM_THREADS = 4;
 
     LFCAT<Integer> lfcat;
 
@@ -28,13 +28,46 @@ public class RangeTest
     }
 
     @Test
-    void ConcurRangeTest() throws Exception
+    void ConcurShortRangeTest() throws Exception
     {
 
         Vector<Thread> threads = new Vector<Thread>();
         Vector<ConcurRangeTestThread> rangeTests = new Vector<ConcurRangeTestThread>();
 
         int range = 10;
+
+        for(int i=0; i < NUM_THREADS; i++)
+        {
+            ConcurRangeTestThread r = new ConcurRangeTestThread(i* range,range, lfcat);
+
+            Thread t = new Thread(r);
+
+            t.start();
+
+            threads.add(t);
+
+            rangeTests.add(r);
+        }
+
+        for(int i=0; i < NUM_THREADS; i++)
+        {
+            threads.elementAt(i).join();
+
+            if(!rangeTests.elementAt(i).pass)
+            {
+                Assert.fail();
+            }
+        }
+    }
+
+    @Test
+    void ConcurLongRangeTest() throws Exception
+    {
+
+        Vector<Thread> threads = new Vector<Thread>();
+        Vector<ConcurRangeTestThread> rangeTests = new Vector<ConcurRangeTestThread>();
+
+        int range = 125;
 
         for(int i=0; i < NUM_THREADS; i++)
         {

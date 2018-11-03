@@ -1,5 +1,7 @@
 package com.cop6616.lfcat;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 enum ContentionInfo
 {
     CONTESTED,
@@ -41,6 +43,8 @@ public abstract class Node
     static final int LOW_CONT_CONTRB = 1;
 
     public abstract boolean IsReplaceable();
+
+    public abstract void HelpIfNeeded(AtomicReference<Node> lfcat);
 
     public abstract void Print();
 

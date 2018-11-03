@@ -1,5 +1,7 @@
 package com.cop6616.lfcat;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class FlagNode extends Node
 {
     // Static Node Flags for the status of the operations.
@@ -21,6 +23,8 @@ public class FlagNode extends Node
     {
         return true;
     }
+
+    public void HelpIfNeeded(AtomicReference<Node> m){return;}
 
     public void Print()
     {

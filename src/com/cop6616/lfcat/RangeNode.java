@@ -51,6 +51,14 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         return storage.result.get() != null;
     }
 
+    public void HelpIfNeeded(AtomicReference<Node> m)
+    {
+        if(this.storage.result.get() == null )
+        {
+            AllInRange(m, lokey, hikey, storage);
+        }
+    }
+
     // Calculates and sets the new contention statistic for a node.
     public int NewStat(ContentionInfo cnt)
     {
@@ -125,7 +133,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
 
             if (!Util.TryReplace(m, b, n))
             {
-                return LowInRange(m, lowKey, highKey, s, backup_s, done, mys);
+                return LowInRange(m, lowKey, highKey, s, backup_s, done, rs);
             }
 
             ReplaceTop(s, n);
@@ -137,7 +145,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         }
         else
         {
-            //Help_If_Needed
+            b.HelpIfNeeded(m);
             return LowInRange(m, lowKey, highKey, s, backup_s, done, rs);
         }
 
@@ -195,7 +203,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
             }
             else if (b.type == NodeType.RANGE && ((RangeNode) b).storage == rs)
             {
-                return null;
+                return new Pair<Node, AVLTree<T>>(b, null);
             }
             else if (b.IsReplaceable())
             {
@@ -203,7 +211,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
                 if (Util.TryReplace(m, b, nr))
                 {
                     ReplaceTop(s, nr);
-                    return null;
+                    return new Pair<Node, AVLTree<T>>(b, null);
                 }
                 else
                 {
@@ -213,7 +221,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
             }
             else
             {
-                //TODO: help if needed
+                b.HelpIfNeeded(m);
                 CopyStateTo(backup_s, s);
                 return RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
             }

@@ -46,6 +46,11 @@ public class BaseNode<T extends Comparable<T>> extends Node
             return true;
     }
 
+    public void HelpIfNeeded(AtomicReference<Node> lfcat)
+    {
+      return;
+    }
+
     // Checks the contention statistic of a node and splits or joins as needed
     public void AdaptIfNeeded(AtomicReference<Node> m)
     {
