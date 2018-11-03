@@ -6,21 +6,12 @@ import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
 {
-    public class ResultStorage<U extends Comparable<U>>
-    {
-        AtomicReference<AVLTree<U>>  result;
-        AtomicBoolean moreThanOneBase;
-
-        public ResultStorage()
-        {
-            moreThanOneBase.set(false);
-        }
-    }
 
     int lokey;
     int hikey;
@@ -60,8 +51,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
 
     public boolean IsReplaceable()
     {
-        //TODO: Rnage Replace
-        return false;
+        return storage.result.get() != null;
     }
 
     // Calculates and sets the new contention statistic for a node.
@@ -98,20 +88,19 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         s.push(n);
     }
 
-    public AVLTree<T> AllInRange(AtomicReference<Node> m, int lowKey, int highKey, ResultStorage<T> rs) //TODO: Add Result Set
+    public static <T extends Comparable<T>> AVLTree<T> AllInRange(AtomicReference<Node> m, int lowKey, int highKey, ResultStorage<T> rs) //TODO: Add Result Set
     {
         Deque<Node> done = new ArrayDeque<Node>();
         Deque<Node> s = new ArrayDeque<Node>();
         Deque<Node> backup_s = new ArrayDeque<Node>();
 
         return LowInRange(m, lowKey,highKey,s,backup_s,done,rs);
-
     }
 
-    public AVLTree<T> LowInRange(AtomicReference<Node> m, int lowKey, int highKey,
+    public static <T extends Comparable<T>> AVLTree<T> LowInRange(AtomicReference<Node> m, int lowKey, int highKey,
                                  Deque<Node> s, Deque<Node> backup_s, Deque<Node> done, ResultStorage<T> rs)
     {
-        Node b = FindBaseStack(m.get(), lowKey, s);
+        Node b = Util.FindBaseStack(m.get(), lowKey, s);
         ResultStorage<T> mys = null;
         if (rs != null)
         {
@@ -134,10 +123,10 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         }
         else if (!b.IsReplaceable())
         {
-            mys = new ResultStorage();
+            mys = new ResultStorage<T>();
             RangeNode<T> n = new RangeNode<T>(b, lowKey, highKey, mys);
 
-            if (!TryReplace(m, b, n))
+            if (!Util.TryReplace(m, b, n))
             {
                 //I believe this should be rs, as mys has no values yet, and we've failed the swap
                 return LowInRange(m, lowKey, highKey, s, backup_s, done, rs);
@@ -145,7 +134,7 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
 
             ReplaceTop(s, n);
         }
-        else if (b.type == NodeType.RANGE && ((RangeNode<T>) b).hikey >= hikey)
+        else if (b.type == NodeType.RANGE && ((RangeNode<T>) b).hikey >= highKey)
         {
             RangeNode<T> brn = (RangeNode<T>) b;
             return AllInRange(m, brn.lokey, brn.hikey, brn.storage);
@@ -159,10 +148,12 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         return RestInRange(m, lowKey, highKey, b, s, backup_s, done, mys);
     }
 
-    public AVLTree<T> RestInRange(AtomicReference<Node> m, int lowKey, int highKey, Node b,
+    public static <T extends Comparable<T>> AVLTree<T> RestInRange(AtomicReference<Node> m, int lowKey, int highKey, Node b,
                                   Deque<Node> s, Deque<Node> backup_s, Deque<Node> done,
                                   ResultStorage<T> rs)
     {
+        AVLTree<T> avl = null;
+
         while(true)
         {
             done.push(b);
@@ -170,20 +161,29 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
 
             RangeNode<T> brn = (RangeNode<T>) b;
 
-            if(brn.data.isEmpty() && (Integer)brn.data.max() >= highKey)
+            if(!brn.data.isEmpty() && (Integer)brn.data.max() >= highKey)
             {
                 break;
             }
 
-            RestInRangeSearch(m, lowKey,highKey, s, backup_s, done, rs);
+            avl = RestInRangeSearch(m, lowKey,highKey, s, backup_s, done, rs);
+        }
+
+        if(avl != null)
+        {
+            return avl;
+        }
+        else
+        {
+            return CompleteRangeSearch(m, done, rs);
         }
     }
 
-    public AVLTree<T> RestInRangeSearch(AtomicReference<Node> m, int lowKey, int highKey,
+    public static <T extends Comparable<T>> AVLTree<T> RestInRangeSearch(AtomicReference<Node> m, int lowKey, int highKey,
                                   Deque<Node> s, Deque<Node> backup_s, Deque<Node> done,
                                   ResultStorage<T> rs)
     {
-        Node b = FindNextBaseStack(s);
+        Node b = Util.FindNextBaseStack(s);
 
         if(b != null)
         {
@@ -193,12 +193,13 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
             }
             else if (b.type == NodeType.RANGE && ((RangeNode) b).storage == rs)
             {
+                RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
                 return RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
             }
             else if (b.IsReplaceable())
             {
                 RangeNode<T> nr = new RangeNode<>(b, lowKey, highKey, rs);
-                if (TryReplace(m, b, nr))
+                if (Util.TryReplace(m, b, nr))
                 {
                     ReplaceTop(s, nr);
                 }
@@ -215,12 +216,15 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
                 return RestInRangeSearch(m, lowKey, highKey, s, backup_s, done, rs);
             }
         }
+
+        return CompleteRangeSearch(m, done, rs);
     }
 
-    public AVLTree<T> CompleteRangeSearch(AtomicReference<Node> m, int lowKey, int highKey,
-                                        Deque<Node> s, Deque<Node> backup_s, Deque<Node> done,
+    public static <T extends Comparable<T>> AVLTree<T> CompleteRangeSearch(AtomicReference<Node> m, Deque<Node> done,
                                         ResultStorage<T> rs)
     {
+        Random rand = new Random();
+
         Object[] arr = done.toArray();
 
         AVLTree<T> avl = null;
@@ -242,75 +246,14 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         {
             rs.moreThanOneBase.set(true);
         }
-        AdaptIfNeeded(m);
+
+        int rindex = rand.nextInt(done.size());
+
+        BaseNode<T> rbn = (BaseNode<T>)arr[rindex];
+
+        rbn.AdaptIfNeeded(m);
+
         return rs.result.get();
     }
 
-    public Node FindBaseStack(Node n, int key, Deque<Node> s)
-    {
-        Node temp = n;
-
-        while(temp.type == NodeType.ROUTE)
-        {
-            s.push(n);
-
-            if(key < ((RouteNode) temp).key)
-            {
-                temp = ((RouteNode) temp).left.get();
-            }
-            else
-            {
-                temp = ((RouteNode) temp).right.get();
-            }
-        }
-
-        s.push(n);
-
-        return n;
-    }
-
-    public Node FindNextBaseStack(Deque<Node> s)
-    {
-        RouteNode b = (RouteNode)s.pop();
-        RouteNode t = (RouteNode)s.getFirst();
-
-        if(t == null)
-        {
-            return null;
-        }
-
-        if(t.type == NodeType.ROUTE && t.left.get() == b)
-        {
-            return LeftmostStack(t.right.get(), s);
-        }
-
-        int target = t.key;
-
-        while(t != null)
-        {
-            if(t.valid.get() && t.key > target)
-            {
-                return LeftmostStack(t.right.get(), s);
-            }
-            else
-            {
-                s.pop();
-                t = (RouteNode)s.getFirst();
-            }
-        }
-
-        return null;
-    }
-
-    public Node LeftmostStack(Node b, Deque<Node> s)
-    {
-        Node n = b;
-        while(n.type == NodeType.ROUTE)
-        {
-            s.push(n);
-            n = ((RouteNode)n).left.get();
-        }
-
-        return n;
-    }
 }

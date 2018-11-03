@@ -83,6 +83,27 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
         return new Pair<T>(left, right);
     }
 
+    public void join(AVLTree<T> trg)
+    {
+        join(trg.root);
+    }
+
+    //This could probably be optimized  to a wholesale merge instead of individual inserts
+    private void join(Node<T> trg)
+    {
+        if(trg.lesser != null)
+        {
+            join(trg.lesser);
+        }
+
+        if(trg.greater != null)
+        {
+            join(trg.greater);
+        }
+
+        add(trg.id);
+    }
+
 
     /**
      * {@inheritDoc}

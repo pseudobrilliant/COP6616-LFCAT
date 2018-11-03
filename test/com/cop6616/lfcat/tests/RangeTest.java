@@ -1,19 +1,34 @@
 package com.cop6616.lfcat.tests;
 
 import com.cop6616.lfcat.LFCAT;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.Vector;
 
-public class LFCATTest
+public class RangeTest
 {
     private static final int NUM_THREADS = 5;
 
-    @Test
-    void ConcurLFCATInsertTest() throws Exception
-    {
+    LFCAT<Integer> lfcat;
 
-        LFCAT<Integer> lfcat = new LFCAT<Integer>();
+    RangeTest()
+    {
+        InsertTest insert = new InsertTest();
+        try
+        {
+            insert.ConcurInsertTest();
+            lfcat = insert.lfcat;
+        }
+        catch (Exception e)
+        {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    void ConcurRangeTest() throws Exception
+    {
 
         Vector<Thread> threads = new Vector<Thread>();
 
@@ -21,7 +36,7 @@ public class LFCATTest
 
         for(int i=0; i < NUM_THREADS; i++)
         {
-            LFCATInsertTest r = new LFCATInsertTest(i * range, range, lfcat);
+            ConcurRangeTestThread r = new ConcurRangeTestThread(i,i+range, lfcat);
 
             Thread t = new Thread(r);
 
@@ -34,16 +49,19 @@ public class LFCATTest
         {
             threads.elementAt(i).join();
         }
+
+        Assert.assertEquals(range * NUM_THREADS, lfcat.Size());
     }
 
 
-    public class LFCATInsertTest implements Runnable
+    public class ConcurRangeTestThread implements Runnable
     {
         LFCAT<Integer> lfcat;
         int start = 0;
         int range =0;
+        boolean pass = false;
 
-        LFCATInsertTest(int _start, int _range, LFCAT<Integer> _lfcat)
+        ConcurRangeTestThread(int _start, int _range, LFCAT<Integer> _lfcat)
         {
             start = _start;
             range = _range;
@@ -53,10 +71,7 @@ public class LFCATTest
         @Override
         public void run()
         {
-            for(int i = start; i < range + start; i ++)
-            {
-                lfcat.Insert(i);
-            }
+            lfcat.RangeQuery(start, range);
         }
     }
 }

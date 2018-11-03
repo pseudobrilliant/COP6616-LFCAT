@@ -86,14 +86,35 @@ public class BaseNode<T extends Comparable<T>> extends Node
 
             right.parent = r;
 
-            Node.TryReplace(m, this, r);
+            Util.TryReplace(m, this, r);
         }
     }
 
-    // Joins a node with its right-hand neighbor if there is low contention
-    public void JoinAdaptation(AtomicReference<Node> m, Node b)
+    // Joins a node with its right- 0r left-hand neighbor if there is low contention
+    public void JoinAdaptation(AtomicReference<Node> root, Node b)
     {
-        //TODO: Find left-most neighbor and merge
+        /*
+        if(b.parent == null)
+        {
+            return;
+        }
+
+        if( ((RouteNode) b.parent).left.get() == b )
+        {
+            Node m = SecureJoinLeft(root, b);
+            if (m != NULL)
+            {
+                completeJoin(root, m);
+            }
+        }
+        else if ( ((RouteNode) b.parent).right.get() == b )
+        {
+            Node m = SecureJoinRight(root, b);
+            if (m != NULL)
+            {
+                completeJoin(root, m);
+            }
+        }*/
     }
 
 }

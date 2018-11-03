@@ -60,49 +60,4 @@ public abstract class Node
 
         return stat;
     }
-
-    // Attempts to replace a node.
-    public static boolean TryReplace(AtomicReference<Node> root, Node b, Node newB)
-    {
-        if(b.parent == null)
-        {
-            return root.compareAndSet(b,newB);
-        }
-        else
-        {
-            RouteNode routeParent = (RouteNode) b.parent;
-
-            if(routeParent.left.get()== b)
-            {
-                return routeParent.left.compareAndSet(b,newB);
-            }
-
-            if(routeParent.right.get() == b)
-            {
-                return routeParent.right.compareAndSet(b,newB);
-            }
-        }
-
-        return false;
-    }
-
-    // Finds and returns the base node for a given key.
-    public static Node FindBaseNode(Node n, int key)
-    {
-        Node temp = n;
-        while(temp.type == NodeType.ROUTE)
-        {
-            if(key < ((RouteNode) temp).key)
-            {
-                temp = ((RouteNode) temp).left.get();
-            }
-            else
-            {
-                temp = ((RouteNode) temp).right.get();
-            }
-        }
-
-        return temp;
-    }
-
 }

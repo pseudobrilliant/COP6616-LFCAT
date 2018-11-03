@@ -1,5 +1,9 @@
 package com.cop6616.lfcat;
 
+import com.jwetherell.algorithms.data_structures.AVLTree;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -28,14 +32,13 @@ public class LFCAT <T extends Comparable<T>>
 
     public boolean Lookup(T x)
     {
-        BaseNode<T> base = (BaseNode<T>) Node.FindBaseNode(root.get(), (Integer)x);
+        BaseNode<T> base = (BaseNode<T>) Util.FindBaseNode(root.get(), (Integer)x);
         return base.DataContains(x);
     }
 
-    public boolean RangeQuery(/* low, high, ?? */)
+    public AVLTree<T> RangeQuery(int lowKey, int highKey)
     {
-        // TODO: implement RangeQuery
-        return false;
+        return RangeNode.AllInRange(root, lowKey, highKey, null);
     }
 
     private boolean DoUpdate(Operation op, T x)
@@ -45,7 +48,7 @@ public class LFCAT <T extends Comparable<T>>
 
         while(true)
         {
-            BaseNode<T> base = (BaseNode<T>)Node.FindBaseNode(root.get(), (Integer)key);
+            BaseNode<T> base = (BaseNode<T>)Util.FindBaseNode(root.get(), (Integer)key);
 
             if(base.IsReplaceable())
             {
@@ -66,7 +69,7 @@ public class LFCAT <T extends Comparable<T>>
 
                 newb.statistic = base.NewStat(cnt_info);
 
-                if(Node.TryReplace(root, base, newb))
+                if(Util.TryReplace(root, base, newb))
                 {
                     newb.AdaptIfNeeded(root);
                     return res;
@@ -103,5 +106,35 @@ public class LFCAT <T extends Comparable<T>>
         }
 
         return true; // default value
+    }
+
+    //NON-CONCURRENT
+    public int Size()
+    {
+        return GetSize(root.get(), 0);
+    }
+
+    private int GetSize(Node n, int size)
+    {
+        if(n.type == NodeType.ROUTE)
+        {
+            RouteNode r = (RouteNode)n;
+            if(r.left != null)
+            {
+                size += GetSize(r.left.get(), size);
+            }
+
+            if(r.right != null)
+            {
+                size += GetSize(r.right.get(), size);
+            }
+        }
+        else
+        {
+            BaseNode<T> b = (BaseNode<T>) n;
+            return b.data.size();
+        }
+
+        return size;
     }
 }
