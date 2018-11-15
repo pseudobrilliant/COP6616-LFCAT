@@ -8,7 +8,7 @@ import java.util.Vector;
 
 public class InsertTest
 {
-    private static final int NUM_THREADS = 5;
+    private static final int NUM_THREADS = 10;
 
     LFCAT<Integer> lfcat = new LFCAT<Integer>();
 
@@ -18,7 +18,7 @@ public class InsertTest
 
         Vector<Thread> threads = new Vector<Thread>();
 
-        int range = 100;
+        int range = 1000;
 
         for(int i=0; i < NUM_THREADS; i++)
         {

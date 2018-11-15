@@ -43,6 +43,7 @@ public class LFCAT <T extends Comparable<T>>
     {
         ContentionInfo cnt_info = ContentionInfo.UNCONTESTED;
         int key = (Integer) x;
+        Node tryBase = null;
 
         while(true)
         {
@@ -67,7 +68,8 @@ public class LFCAT <T extends Comparable<T>>
 
                 newb.statistic = base.NewStat(cnt_info);
 
-                if(Util.TryReplace(root, base, newb))
+                tryBase = Util.TryReplace(root, base, newb);
+                if(base == tryBase)
                 {
                     newb.AdaptIfNeeded(root);
                     return res;
@@ -75,7 +77,7 @@ public class LFCAT <T extends Comparable<T>>
             }
 
             cnt_info = ContentionInfo.CONTESTED;
-            this.HelpIfNeeded(base);
+            tryBase.HelpIfNeeded(root);
         }
     }
 

@@ -9,7 +9,7 @@ import java.util.Vector;
 
 public class RangeTest
 {
-    private static final int NUM_THREADS = 4;
+    private static final int NUM_THREADS = 5;
 
     LFCAT<Integer> lfcat;
 
@@ -67,7 +67,7 @@ public class RangeTest
         Vector<Thread> threads = new Vector<Thread>();
         Vector<ConcurRangeTestThread> rangeTests = new Vector<ConcurRangeTestThread>();
 
-        int range = 125;
+        int range = 1000;
 
         for(int i=0; i < NUM_THREADS; i++)
         {
@@ -100,6 +100,8 @@ public class RangeTest
         int start = 0;
         int range =0;
         boolean pass = true;
+        AVLTree<Integer> tree;
+
 
         ConcurRangeTestThread(int _start, int _range, LFCAT<Integer> _lfcat)
         {
@@ -111,7 +113,7 @@ public class RangeTest
         @Override
         public void run()
         {
-            AVLTree<Integer> tree = lfcat.RangeQuery(start, start + range);
+            tree = lfcat.RangeQuery(start, start + range);
 
             for(int i = start; i < start + range; i++)
             {

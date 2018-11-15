@@ -21,6 +21,7 @@ public class BaseNode<T extends Comparable<T>> extends Node
         data = new AVLTree<T>(_data);
     }
 
+
     public boolean DataInsert(T x)
     {
         return data.add(x);

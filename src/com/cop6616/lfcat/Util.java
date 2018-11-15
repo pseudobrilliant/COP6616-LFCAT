@@ -7,11 +7,13 @@ public class Util
 {
 
     // Attempts to replace a node.
-    public static boolean TryReplace(AtomicReference<Node> root, Node b, Node newB)
+    public static Node TryReplace(AtomicReference<Node> root, Node b, Node newB)
     {
+        boolean res = true;
+
         if(b.parent == null)
         {
-            return root.compareAndSet(b,newB);
+            return root.compareAndExchange(b,newB);
         }
         else
         {
@@ -19,16 +21,16 @@ public class Util
 
             if(routeParent.left.get()== b)
             {
-                return routeParent.left.compareAndSet(b,newB);
+                return routeParent.left.compareAndExchange(b,newB);
             }
 
             if(routeParent.right.get() == b)
             {
-                return routeParent.right.compareAndSet(b,newB);
+                return routeParent.right.compareAndExchange(b,newB);
             }
         }
 
-        return false;
+        return root.get();
     }
 
     // Finds and returns the base node for a given key.
@@ -156,13 +158,13 @@ public class Util
                 }
                 else
                 {
-                    if(t.type == NodeType.ROUTE)
+                    if(s.getFirst().type != NodeType.ROUTE)
                     {
-                        t = (RouteNode) s.getFirst();
+                        return null;
                     }
                     else
                     {
-                        return s.getFirst();
+                        t = (RouteNode) s.getFirst();
                     }
                 }
             }
@@ -179,6 +181,8 @@ public class Util
             s.push(n);
             n = ((RouteNode)n).left.get();
         }
+
+        s.push(n);
 
         return n;
     }
