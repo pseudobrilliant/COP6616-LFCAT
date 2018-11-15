@@ -2,7 +2,7 @@ package com.cop6616.lfcat.tests;
 
 import com.cop6616.lfcat.LFCAT;
 import org.junit.jupiter.api.Test;
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Vector;
 
@@ -38,7 +38,7 @@ public class InsertTest
 
         lfcat.Print();
 
-        Assert.assertEquals(range * NUM_THREADS, lfcat.Size());
+        assertEquals(range * NUM_THREADS, lfcat.Size());
     }
 
 

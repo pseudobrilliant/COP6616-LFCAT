@@ -2,8 +2,8 @@ package com.cop6616.lfcat.tests;
 
 import com.cop6616.lfcat.LFCAT;
 import com.jwetherell.algorithms.data_structures.AVLTree;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Vector;
 
@@ -23,7 +23,7 @@ public class RangeTest
         }
         catch (Exception e)
         {
-            Assert.fail();
+            fail();
         }
     }
 
@@ -55,7 +55,7 @@ public class RangeTest
 
             if(!rangeTests.elementAt(i).pass)
             {
-                Assert.fail();
+                fail();
             }
         }
     }
@@ -88,7 +88,7 @@ public class RangeTest
 
             if(!rangeTests.elementAt(i).pass)
             {
-                Assert.fail();
+                fail();
             }
         }
     }
