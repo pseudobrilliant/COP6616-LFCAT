@@ -4,9 +4,13 @@ import com.jwetherell.algorithms.data_structures.AVLTree;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+
 public class BaseNode<T extends Comparable<T>> extends Node
 {
     AVLTree<T> data;
+
+    protected static final int MAX_SIZE = 1000;
+    protected static final int MAX_SIZE_CNTB = 500;
 
     public BaseNode()
     {
@@ -21,6 +25,17 @@ public class BaseNode<T extends Comparable<T>> extends Node
         data = new AVLTree<T>(_data);
     }
 
+    public int NewStat(ContentionInfo cnt)
+    {
+        int stat = super.NewStat(cnt);
+
+        if(data.size() >= MAX_SIZE)
+        {
+            stat += MAX_SIZE_CNTB;
+        }
+
+        return stat;
+    }
 
     public boolean DataInsert(T x)
     {

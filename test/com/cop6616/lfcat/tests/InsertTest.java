@@ -18,7 +18,7 @@ public class InsertTest
 
         Vector<Thread> threads = new Vector<Thread>();
 
-        int range = 1000;
+        int range = 100000;
 
         for(int i=0; i < NUM_THREADS; i++)
         {

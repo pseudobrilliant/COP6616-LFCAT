@@ -73,6 +73,11 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
             stat = statistic - LOW_CONT_CONTRB - RANGE_CONTRIB;
         }
 
+        if(data.size() >= MAX_SIZE)
+        {
+            stat += MAX_SIZE_CNTB;
+        }
+
         return stat;
     }
 

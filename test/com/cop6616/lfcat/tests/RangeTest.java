@@ -67,7 +67,7 @@ public class RangeTest
         Vector<Thread> threads = new Vector<Thread>();
         Vector<ConcurRangeTestThread> rangeTests = new Vector<ConcurRangeTestThread>();
 
-        int range = 1000;
+        int range = 40000;
 
         for(int i=0; i < NUM_THREADS; i++)
         {

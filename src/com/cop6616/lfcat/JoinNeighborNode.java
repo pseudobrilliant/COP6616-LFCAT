@@ -21,7 +21,7 @@ public class JoinNeighborNode<T extends Comparable<T>> extends BaseNode<T>
         status = NodeStatus.NONE;
         mainNode = _mainNode;
         parent = _neighborNode.parent;
-        data = new AVLTree<T>(((BaseNode<T>)_neighborNode).data);
+        data = new AVLTree<T>(((BaseNode<T>)_neighborNode).data); // Use copy constructor
     }
 
     // Checks if a node is replacable.
