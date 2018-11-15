@@ -9,8 +9,6 @@ public class Util
     // Attempts to replace a node.
     public static Node TryReplace(AtomicReference<Node> root, Node b, Node newB)
     {
-        boolean res = true;
-
         if(b.parent == null)
         {
             return root.compareAndExchange(b,newB);
@@ -30,7 +28,7 @@ public class Util
             }
         }
 
-        return root.get();
+        return null;
     }
 
     // Finds and returns the base node for a given key.
@@ -95,7 +93,7 @@ public class Util
         }
         if(currentNode.type != NodeType.ROUTE)
         {
-            return null;
+            return FlagNode.NOT_FOUND;
         }
 
         return prevNode;

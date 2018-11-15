@@ -77,7 +77,11 @@ public class LFCAT <T extends Comparable<T>>
             }
 
             cnt_info = ContentionInfo.CONTESTED;
-            tryBase.HelpIfNeeded(root);
+
+            if(tryBase != null)
+            {
+                tryBase.HelpIfNeeded(root);
+            }
         }
     }
 

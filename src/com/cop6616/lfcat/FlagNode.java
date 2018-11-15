@@ -12,6 +12,7 @@ public class FlagNode extends Node
     public static final Node ABORTED = new FlagNode(NodeStatus.ABORTED);
     public static final Node NEEDS_HELP = new FlagNode(NodeStatus.NEEDS_HELP);
     public static final Node DONE = new FlagNode(NodeStatus.DONE);
+    public static final Node NOT_FOUND = new FlagNode(NodeStatus.NOT_FOUND);
 
     public FlagNode(NodeStatus _status)
     {

@@ -26,7 +26,8 @@ enum NodeStatus
     PREPARING,
     ABORTED,
     NEEDS_HELP,
-    DONE
+    DONE,
+    NOT_FOUND
 }
 
 public abstract class Node

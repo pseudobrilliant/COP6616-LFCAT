@@ -38,90 +38,115 @@ public class JoinMainNode<T extends Comparable<T>> extends BaseNode<T>
         return (neighbor2.get() == FlagNode.ABORTED);  // Check status of neighbor2
     }
 
-    public static Node SecureJoinLeft(AtomicReference<Node> root, Node base)
-    {/*
+
+    public static <T extends Comparable<T>> Node SecureJoinLeft(AtomicReference<Node> root, Node base)
+    {
         Node n0 = Util.FindLeftmostBaseNode( ((RouteNode) base.parent).right.get() );
         if( !n0.IsReplaceable() )
             return null;
         
-        Node main = new JoinMainNode(base); // assign fields from base
+        Node main = new JoinMainNode<T>(base); // assign fields from base
 
-        if(! ((RouteNode) base.parent).left.compareAndExchange( base, main) )
+        if( !((RouteNode) base.parent).left.compareAndSet( base, main) )
             return null; // Failed to replace BaseNode with JoinMain node
 
-        Node n1 = new JoinNeighborNode(main, n0)
+        Node n1 = new JoinNeighborNode<T>(main, n0);
         
-        if( !Util.TryReplace(root, n0, n1) )
-            goto fail0;
-        if( !compareAndExchange( ((RouteNode) m.parent).join_id, null, main) )
-            goto fail0;
+        if( n1 != Util.TryReplace(root, n0, n1) )
+        {
+            return Fail0(main);
+        }
+        if( !((RouteNode) main.parent).joinID.compareAndSet(null, main) )
+        {
+            return Fail0(main);
+        }
 
-/*Keep going from here*/
-    /*
-        Node grandparent = parent_of(t, m->parent);
-        if(gparent == NOT_FOUND || (gparent != NULL && !CAS(&gparent ->join_id ,NULL,m)))
-            goto fail1;
+        Node gparent = Util.FindParentOf(root, (RouteNode) main.parent);
+        if(gparent == FlagNode.NOT_FOUND || (gparent != null && !((RouteNode) gparent).joinID.compareAndSet(null,main)) )
+        {
+            return Fail1(main);
+        }
 
-        m->gparent = gparent;
-        m->otherb = aload(&m->parent ->right);
-        m->neigh1 = n1;
+        ((JoinMainNode<T>) main).gparent = gparent;
+        ((JoinMainNode<T>) main).otherb = ((RouteNode) main.parent).right.get();
+        ((JoinMainNode<T>) main).neighbor1 = n1;
         
-        node* joinedp = m->otherb==n1 ? gparent: n1->parent;
-        if(CAS(&m->neigh2 , PREPARING , new node{... = n1, // assign fields from n1
-                                            type = join_neighbor ,
-                                            parent = joinedp ,
-                                            main_node = m,
-                                            data = treap_join(m, n1)}))
-            return m;
+        Node joinedp = ((JoinMainNode<T>) main).otherb==n1 ? gparent: n1.parent;
 
-        if(gparent == NULL) goto fail1;
-        astore(&gparent ->join_id , NULL);
 
-fail1: astore(&m->parent ->join_id , NULL);
-fail0: astore(&m->neigh2 , ABORTED);*/
+        Node temp = new JoinNeighborNode(main, n1); // assign fields from n1
+        temp.parent = joinedp;
+
+        if( ((JoinMainNode<T>) main).neighbor2.compareAndSet( FlagNode.PREPARING , temp) )
+        {
+            return main;
+        }
+
+        if(gparent == null)
+        {
+            return Fail1(main);
+        }
+
+        ((RouteNode) gparent).joinID.set(null);
+
         return null;
-}
+    }
 
-    public static Node SecureJoinRight(AtomicReference<Node> root, Node base)
+
+    public static <T extends Comparable<T>> Node Fail0(Node main)
+    {
+        ((JoinMainNode<T>) main).neighbor2.set(FlagNode.ABORTED);
+        return null;
+    }
+
+    public static Node Fail1(Node main)
+    {
+        ((RouteNode) main.parent).joinID.set(null);
+        return Fail0(main);
+    }
+
+
+
+    public static <T extends Comparable<T>> Node SecureJoinRight(AtomicReference<Node> root, Node base)
     {
         return null;
     }
 
     // This version of CompleteJoin recasts main as a JoinMainNode FOR EACH invocation
-    public static void CompleteJoin(AtomicReference<Node> root, Node main)
+    public  static <T extends Comparable<T>> void CompleteJoin(AtomicReference<Node> root, Node main)
     {
-        Node n2 = (Node)((JoinMainNode) main).neighbor2.get();
+        Node n2 = (Node)((JoinMainNode<T>) main).neighbor2.get();
         if(n2 == FlagNode.DONE)
         {
             return;
         }
 
-        Util.TryReplace(root, ((JoinMainNode) main).neighbor1, n2);
+        Util.TryReplace(root, ((JoinMainNode<T>) main).neighbor1, n2);
         ((RouteNode) main.parent).valid.set(false);
 
         Node replacement;
-        if ( ((JoinMainNode) main).otherb == ((JoinMainNode) main).neighbor1 )
+        if ( ((JoinMainNode<T>) main).otherb == ((JoinMainNode<T>) main).neighbor1 )
         {
             replacement = n2;
         }
         else
         {
-            replacement = ((JoinMainNode) main).otherb;
+            replacement = ((JoinMainNode<T>) main).otherb;
         }
 
-        if ( ((JoinMainNode) main).gparent == null)
+        if ( ((JoinMainNode<T>) main).gparent == null)
         {
             root.compareAndExchange(main.parent, replacement);
         }
-        else if( ((RouteNode) ((JoinMainNode) main).gparent).left.get() == main.parent)
+        else if( ((RouteNode) ((JoinMainNode<T>) main).gparent).left.get() == main.parent)
         {
-            ((RouteNode) ((JoinMainNode) main).gparent).left.compareAndExchange(main.parent, replacement);
-            ((RouteNode) ((JoinMainNode) main).gparent).joinID.compareAndExchange(main, null);
+            ((RouteNode) ((JoinMainNode<T>) main).gparent).left.compareAndSet(main.parent, replacement);
+            ((RouteNode) ((JoinMainNode<T>) main).gparent).joinID.compareAndSet(main, null);
         }
         else if( ((RouteNode) ((JoinMainNode) main).gparent).right.get() == main.parent)
         {
-            ((RouteNode) ((JoinMainNode) main).gparent).right.compareAndExchange(main.parent, replacement);
-            ((RouteNode) ((JoinMainNode) main).gparent).joinID.compareAndExchange(main, null);
+            ((RouteNode) ((JoinMainNode<T>) main).gparent).right.compareAndSet(main.parent, replacement);
+            ((RouteNode) ((JoinMainNode<T>) main).gparent).joinID.compareAndSet(main, null);
         }
 
         ((JoinMainNode) main).neighbor2.set(FlagNode.DONE);
@@ -129,10 +154,10 @@ fail0: astore(&m->neigh2 , ABORTED);*/
 
 
 /*
-    // This version of CompleteJoin recasts main as a JoinMainNode once at the top
+    // This version of CompleteJoin recasts main as a JoinMainNode<T> once at the top
     public static void CompleteJoin(AtomicReference<Node> root, Node main)
     {
-        JoinMainNode m = (JoinMainNode) main;
+        JoinMainNode m = (JoinMainNode<T>) main;
         Node n2 = (Node) m.neighbor2.get();
         if(n2 == FlagNode.DONE)
         {
