@@ -1,6 +1,7 @@
 package com.cop6616.lfcat;
 
 import com.jwetherell.algorithms.data_structures.AVLTree;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class JoinNeighborNode<T extends Comparable<T>> extends BaseNode<T>
 {
@@ -10,7 +11,6 @@ public class JoinNeighborNode<T extends Comparable<T>> extends BaseNode<T>
     public JoinNeighborNode(Node _mainNode)
     {
         type = NodeType.JOIN_NEIGHBOR;
-        status = NodeStatus.NONE;
         mainNode = _mainNode;
     }
 
@@ -18,7 +18,6 @@ public class JoinNeighborNode<T extends Comparable<T>> extends BaseNode<T>
     {
 //        JoinNeighborNode(_main);
         type = NodeType.JOIN_NEIGHBOR;
-        status = NodeStatus.NONE;
         mainNode = _mainNode;
         parent = _neighborNode.parent;
         data = new AVLTree<T>(((BaseNode<T>)_neighborNode).data); // Use copy constructor
@@ -35,4 +34,13 @@ public class JoinNeighborNode<T extends Comparable<T>> extends BaseNode<T>
 
         return false;
     }
+
+    @Override
+    public void HelpIfNeeded(AtomicReference<Node> root)
+    {
+        this.mainNode.HelpIfNeeded(root);
+        return;
+    }
+
+
 }

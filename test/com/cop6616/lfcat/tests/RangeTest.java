@@ -9,7 +9,7 @@ import java.util.Vector;
 
 public class RangeTest
 {
-    private static final int NUM_THREADS = 5;
+    private static final int NUM_THREADS = 8;
 
     LFCAT<Integer> lfcat;
 

@@ -231,6 +231,11 @@ public class BinarySearchTree<T extends Comparable<T>> implements ITree<T> {
         if (startingNode == null)
             return null;
 
+        if(startingNode.greater == null)
+        {
+            return startingNode;
+        }
+
         Node<T> greater = startingNode.greater;
         while (greater != null && greater.id != null) {
             Node<T> node = greater.greater;
@@ -272,6 +277,11 @@ public class BinarySearchTree<T extends Comparable<T>> implements ITree<T> {
         if (startingNode == null)
             return null;
 
+        if(startingNode.lesser == null)
+        {
+            return startingNode;
+        }
+
         Node<T> lesser = startingNode.lesser;
         while (lesser != null && lesser.id != null) {
             Node<T> node = lesser.lesser;
@@ -285,7 +295,14 @@ public class BinarySearchTree<T extends Comparable<T>> implements ITree<T> {
 
     public T min()
     {
+
         Node<T> l = getLeast(root);
+
+        if(l == null)
+        {
+            System.out.println("GOD HELP US");
+        }
+
 
         if(l == null)
         {

@@ -5,15 +5,31 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Util
 {
+    public static class Pair<T, U>
+    {
+        public final T a;
+        public final U b;
+
+        public Pair(T _a, U _b)
+        {
+            a = _a;
+            b = _b;
+        }
+    }
 
     // Attempts to replace a node.
     public static Node TryReplace(AtomicReference<Node> root, Node b, Node newB)
     {
-        boolean res = true;
-
         if(b.parent == null)
         {
-            return root.compareAndExchange(b,newB);
+            if(root.compareAndSet(b,newB))
+            {
+                return newB;
+            }
+            else
+            {
+                return root.get();
+            }
         }
         else
         {
@@ -21,16 +37,30 @@ public class Util
 
             if(routeParent.left.get()== b)
             {
-                return routeParent.left.compareAndExchange(b,newB);
+                if(routeParent.left.compareAndSet(b,newB))
+                {
+                    return newB;
+                }
+                else
+                {
+                    return routeParent.left.get();
+                }
             }
 
             if(routeParent.right.get() == b)
             {
-                return routeParent.right.compareAndExchange(b,newB);
+                if(routeParent.right.compareAndSet(b,newB))
+                {
+                    return newB;
+                }
+                else
+                {
+                    return routeParent.right.get();
+                }
             }
         }
 
-        return root.get();
+        return null;
     }
 
     // Finds and returns the base node for a given key.
@@ -39,7 +69,7 @@ public class Util
         Node temp = n;
         while(temp.type == NodeType.ROUTE)
         {
-            if(key < ((RouteNode) temp).key)
+            if(key <= ((RouteNode) temp).key)
             {
                 temp = ((RouteNode) temp).left.get();
             }
@@ -95,7 +125,7 @@ public class Util
         }
         if(currentNode.type != NodeType.ROUTE)
         {
-            return null;
+            return FlagNode.NOT_FOUND;
         }
 
         return prevNode;
@@ -105,11 +135,13 @@ public class Util
     {
         Node temp = n;
 
+        s.clear();
+
         while(temp.type == NodeType.ROUTE)
         {
             s.push(temp);
 
-            if(key < ((RouteNode) temp).key)
+            if(key <= ((RouteNode) temp).key)
             {
                 temp = ((RouteNode) temp).left.get();
             }
@@ -126,45 +158,53 @@ public class Util
 
     public static Node FindNextBaseStack(Deque<Node> s)
     {
-        Node b = s.pop();
-
-        if(s.isEmpty())
+        if(s.size() > 0)
         {
-            return b;
-        }
+            Node b = s.pop();
 
-        RouteNode t = (RouteNode)s.getFirst();
-
-
-        if(t.type == NodeType.ROUTE && t.left.get() == b)
-        {
-            return LeftmostStack(t.right.get(), s);
-        }
-
-        int target = t.key;
-
-        while(t != null)
-        {
-            if(t.valid.get() && t.key > target)
+            if (s.isEmpty())
             {
-                return LeftmostStack(t.right.get(), s);
+                return null;
             }
-            else
+
+            Node t = s.getFirst();
+
+            if(t.type == NodeType.ROUTE)
             {
-                s.pop();
-                if(s.isEmpty())
+                RouteNode r = (RouteNode) t;
+
+                if (r.left.get() == b)
                 {
-                    t = null;
+                    return LeftmostStack(r.right.get(), s);
                 }
-                else
+
+                int target = r.key;
+
+                while (r != null)
                 {
-                    if(s.getFirst().type != NodeType.ROUTE)
+                    if (r.valid.get() && r.key > target)
                     {
-                        return null;
+                        return LeftmostStack(r.right.get(), s);
                     }
                     else
                     {
-                        t = (RouteNode) s.getFirst();
+                        s.pop();
+                        if (s.isEmpty())
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            t = s.getFirst();
+                            if (t.type != NodeType.ROUTE)
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                r = (RouteNode) t;
+                            }
+                        }
                     }
                 }
             }

@@ -3,7 +3,9 @@ package com.cop6616.lfcat.tests;
 import com.cop6616.lfcat.LFCAT;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.Random;
 import java.util.Vector;
 
 public class InsertTest
@@ -36,31 +38,45 @@ public class InsertTest
             threads.elementAt(i).join();
         }
 
-        lfcat.Print();
-
-        assertEquals(range * NUM_THREADS, lfcat.Size());
+        //lfcat.Print();
     }
 
 
     public class InsertTestThread implements Runnable
     {
         LFCAT<Integer> lfcat;
-        int start = 0;
         int range =0;
+        Random random;
+        Vector<Integer> inserted;
 
         InsertTestThread(int _start, int _range, LFCAT<Integer> _lfcat)
         {
-            start = _start;
             range = _range;
             lfcat = _lfcat;
+            random = new Random();
+            inserted = new Vector<Integer>();
+
+            for(int i = 0; i < range; i ++)
+            {
+                Integer rnd = random.nextInt(1000000);
+                inserted.add(rnd);
+            }
         }
 
         @Override
         public void run()
         {
-            for(int i = start; i < range + start; i ++)
+            for(int i = 0; i < range; i ++)
             {
-                lfcat.Insert(i);
+                lfcat.Insert(inserted.elementAt(i));
+            }
+
+            for(int i = 0; i < range; i ++)
+            {
+                if(!lfcat.Lookup(inserted.elementAt(i)))
+                {
+                    fail();
+                }
             }
         }
     }

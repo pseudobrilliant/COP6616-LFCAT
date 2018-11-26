@@ -9,21 +9,18 @@ public class RouteNode extends Node
 
     AtomicReference<Node> left = new AtomicReference<Node>();
     AtomicReference<Node> right = new AtomicReference<Node>();
-    AtomicReference<Node> joinID;
+    AtomicReference<Node> joinID = new AtomicReference<Node>();
     AtomicBoolean valid = new AtomicBoolean();
 
     public RouteNode()
     {
         type = NodeType.ROUTE;
-        status = NodeStatus.NONE;
         valid.set(true);
     }
 
     public RouteNode(int _key, Node _left, Node _right)
     {
         type = NodeType.ROUTE;
-
-        status = NodeStatus.NONE;
 
         valid.set(true);
 
@@ -38,7 +35,7 @@ public class RouteNode extends Node
         return false;
     }
 
-    public void HelpIfNeeded(AtomicReference<Node> m){return;}
+    public void HelpIfNeeded(AtomicReference<Node> root){return;}
 
     public void Print()
     {

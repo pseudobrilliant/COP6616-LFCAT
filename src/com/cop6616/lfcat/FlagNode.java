@@ -8,15 +8,15 @@ public class FlagNode extends Node
     // Implemented as (some_node == Node.FLAG_NODE), if this does not work
     // then implement as (some_node.status == NodeStatus.STATUS)
     //NOT_FOUND is a flag used for treap results in the range so not included here.
-    public static final Node PREPARING = new FlagNode(NodeStatus.PREPARING);
-    public static final Node ABORTED = new FlagNode(NodeStatus.ABORTED);
-    public static final Node NEEDS_HELP = new FlagNode(NodeStatus.NEEDS_HELP);
-    public static final Node DONE = new FlagNode(NodeStatus.DONE);
+    public static final Node PREPARING = new FlagNode();
+    public static final Node ABORTED = new FlagNode();
+    public static final Node NEEDS_HELP = new FlagNode(); // Remove this when HelpIfNeeded is removed from LFCAT
+    public static final Node DONE = new FlagNode();
+    public static final Node NOT_FOUND = new FlagNode();
 
-    public FlagNode(NodeStatus _status)
+    public FlagNode()
     {
         type = NodeType.FLAG;
-        status = _status;
     }
 
     public boolean IsReplaceable ()
@@ -24,7 +24,7 @@ public class FlagNode extends Node
         return true;
     }
 
-    public void HelpIfNeeded(AtomicReference<Node> m){return;}
+    public void HelpIfNeeded(AtomicReference<Node> root){return;}
 
     public void Print()
     {

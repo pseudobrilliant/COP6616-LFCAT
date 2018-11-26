@@ -1,7 +1,6 @@
 package com.jwetherell.algorithms.data_structures;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * An AVL tree is a self-balancing binary search tree, and it was the first such
@@ -69,19 +68,67 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
         };
     }
 
-    public T getSplitKey()
-    {
-        return root.id;
+    class NaturalComparator<T extends Comparable<T>> implements Comparator<T> {
+        public int compare(T a, T b) {
+            return a.compareTo(b);
+        }
     }
 
+
+    // AVL Split that finds the exact midpoint and builds 2 new trees from a list.
     public Pair<T> split()
     {
-        AVLTree<T> left = new AVLTree<T>((AVLNode<T>)this.root.lesser);
-        AVLTree<T> right = new AVLTree<T>((AVLNode<T>)this.root.greater);
-        left.addValue(root.id);
 
-        return new Pair<T>(left, right);
+        Collection<T> collection = this.toCollection();
+
+        List<T> list = new ArrayList<T>(collection);
+
+        NaturalComparator comparator = new NaturalComparator<T>();
+
+        list.sort(comparator);
+
+        T mid = list.get(list.size() / 2);
+
+        AVLTree<T> left = new AVLTree<T>();
+        AVLTree<T> right = new AVLTree<T>();
+
+        for(int i =0; i < list.size(); i ++)
+        {
+            T val = list.get(i);
+            if(val.compareTo(mid) <= 0)
+            {
+                left.addValue(val);
+            }
+            else
+            {
+                right.addValue(val);
+            }
+        }
+
+
+        return new Pair<T>(mid, left, right);
     }
+
+
+/*
+    // AVL Split that finds the approximate midpoint (ie. the root id) and returns balanced lesser and greater fields
+    public Pair<T> split()
+    {
+        AVLNode<T> node = (AVLNode<T>) this.root;
+        T splitKey = this.root.id;
+
+        AVLTree <T> left = new AVLTree((AVLNode<T>) node.lesser);
+        left.add(splitKey);
+        left.recursiveBalance();
+
+        AVLTree <T> right = new AVLTree((AVLNode<T>) node.greater);
+        right.recursiveBalance();
+
+        return new Pair<T>(splitKey, left, right);
+    }
+
+*/
+
 
     public void join(AVLTree<T> trg)
     {
@@ -91,17 +138,21 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
     //This could probably be optimized  to a wholesale merge instead of individual inserts
     private void join(Node<T> trg)
     {
-        if(trg.lesser != null)
+        if(trg != null)
         {
-            join(trg.lesser);
-        }
 
-        if(trg.greater != null)
-        {
-            join(trg.greater);
-        }
+            if (trg.lesser != null)
+            {
+                join(trg.lesser);
+            }
 
-        add(trg.id);
+            if (trg.greater != null)
+            {
+                join(trg.greater);
+            }
+
+            add(trg.id);
+        }
     }
 
 
@@ -177,6 +228,23 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
 
             child.updateHeight();
             node.updateHeight();
+        }
+    }
+
+    /**
+     * Balance the tree recursively from the root.
+     *
+     */
+    private void recursiveBalance() {
+        AVLNode<T> node = (AVLNode) this.root;
+        if(node == null)
+        {
+            return;
+        }
+        int balanceFactor = node.getBalanceFactor();
+        if (balanceFactor > 1 || balanceFactor < -1) {
+            this.balanceAfterInsert(node);
+            this.recursiveBalance();
         }
     }
 
@@ -459,8 +527,10 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
 
         private AVLTree<T> left;
         private AVLTree<T> right;
+        public T key;
 
-        protected Pair(AVLTree<T> left, AVLTree<T> right) {
+        protected Pair(T _key, AVLTree<T> left, AVLTree<T> right) {
+            this.key = _key;
             this.left = left;
             this.right = right;
         }
