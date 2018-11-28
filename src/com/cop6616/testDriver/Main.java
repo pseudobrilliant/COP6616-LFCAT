@@ -14,9 +14,11 @@ public class Main {
 
     static final int NUMOPS = 1000000;
 
-    static LFCAT<Integer> PrePopulateTree()
+    static LFCAT<Integer> PrePopulateTree( int treeSize)
     {
         LFCAT<Integer> lfcat = new LFCAT<>();
+
+        LFCAT.SetTreeSize(treeSize);
 
         Vector<Thread> threads = new Vector<Thread>();
 
@@ -78,10 +80,10 @@ public class Main {
         }
     }
 
-    static Double LFCATTest(String test, int numThreads, int range,  Ratio ratios) throws Exception
+    static Double LFCATTest(String test, int numThreads, int treeSize, int range,  Ratio ratios) throws Exception
     {
 
-        LFCAT<Integer> lfcat = PrePopulateTree();
+        LFCAT<Integer> lfcat = PrePopulateTree(treeSize);
 
         Vector<Thread> threads = new Vector<Thread>();
 
@@ -144,16 +146,16 @@ public class Main {
                 x.add((int) Math.pow(2, i));
 
                 Ratio realWorld = new Ratio(0.02f, 0.09f, 0.09f, 0.80f);
-                rw.add( (float)NUMOPS / LFCATTest("Real World Test", (int) Math.pow(2, i), 100, realWorld));
+                rw.add( (float)NUMOPS / LFCATTest("Real World Test", (int) Math.pow(2, i), 10,100, realWorld));
 
                 Ratio highContention = new Ratio(0.001f, 0.20f, 0.20f, 0.599f);
-                hcnt.add( (float)NUMOPS / LFCATTest("High Contention Test", (int) Math.pow(2, i), 100,  highContention));
+                hcnt.add( (float)NUMOPS / LFCATTest("High Contention Test", (int) Math.pow(2, i), 10,100,  highContention));
 
                 Ratio lowContention = new Ratio(0.20f, 0.05f, 0.05f, 0.70f);
-                lcnt.add( (float)NUMOPS / LFCATTest("Low Contention Test", (int) Math.pow(2, i), 100,  lowContention));
+                lcnt.add( (float)NUMOPS / LFCATTest("Low Contention Test", (int) Math.pow(2, i), 10,100,  lowContention));
 
                 Ratio highConflict = new Ratio(0.20f, 0.40f, 0.40f, 0.00f);
-                hcnf.add( (float)NUMOPS / LFCATTest("High Conflict Test", (int) Math.pow(2, i), 100,  highConflict));
+                hcnf.add( (float)NUMOPS / LFCATTest("High Conflict Test", (int) Math.pow(2, i), 10,100,  highConflict));
 
                 System.out.println("");
 
@@ -170,13 +172,32 @@ public class Main {
 
         Ratio rr = new Ratio(0.80f, 0.1f, 0.1f, 0.00f);
 
-        for(int i =1; i <= 15; i ++)
+        for(int i =1; i <= 10; i ++)
         {
             try
             {
                 int range = (int) Math.pow(2, i);
                 rngx.add(range);
-                rng.add((float) NUMOPS / LFCATTest("Multi Range Test ("+range+")", 16, range, rr));
+                rng.add((float) NUMOPS / LFCATTest("Multi Range Test ("+range+")", 16, 10, range, rr));
+            }
+            catch(Exception e)
+            {
+                System.out.println("ERROR: Unable to run test!!!");
+            }
+        }
+
+        Vector<Integer> treeSizex = new Vector<Integer>();
+        treeSizex.add(1); treeSizex.add(10); treeSizex.add(100); treeSizex.add(500); treeSizex.add(1000); treeSizex.add(5000);
+        Vector<Double> treeSize = new Vector<Double>();
+
+        Ratio treer = new Ratio(0.02f, 0.09f, 0.09f, 0.80f);
+
+        for(int i =0; i < treeSizex.size(); i ++)
+        {
+            try
+            {
+                int size = treeSizex.elementAt(i);
+                treeSize.add((float) NUMOPS / LFCATTest("Multi Size Test ("+size+")", 16,  size,100, treer));
             }
             catch(Exception e)
             {
@@ -212,6 +233,9 @@ public class Main {
         series = chart.addSeries("Range Tests", rngx, rng);
         charts.add(chart);
 
+        chart = new XYChartBuilder().xAxisTitle("Tree Size").yAxisTitle("Throughput (ops/us)").width(600).height(400).build();
+        series = chart.addSeries("Tree Size Tests", treeSizex, treeSize);
+        charts.add(chart);
 
         new SwingWrapper<XYChart>(charts).displayChartMatrix();
     }

@@ -115,13 +115,10 @@ public class RangeTest
         {
             tree = lfcat.RangeQuery(start, start + range);
 
-            for(int i = start; i < start + range; i++)
-            {
-                if(tree == null || !tree.contains(i))
-                {
-                   pass = false;
-                }
-            }
+           if(tree.isEmpty())
+           {
+               fail();
+           }
         }
     }
 }

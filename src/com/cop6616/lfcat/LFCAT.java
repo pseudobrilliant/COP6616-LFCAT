@@ -22,6 +22,11 @@ public class LFCAT <T extends Comparable<T>>
         root.set(node);
     }
 
+    public static void SetTreeSize(int treeSize)
+    {
+        BaseNode.treeSize = treeSize;
+    }
+
     public boolean Insert(T x)
     {
         return DoUpdate(Operation.INSERT, x);

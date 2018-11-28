@@ -13,8 +13,8 @@ public class BaseNode<T extends Comparable<T>> extends Node
 {
     AVLTree<T> data;
 
-    protected static final int MAX_SIZE = 100;
     protected static final int MAX_SIZE_CNTB = 100;
+    public static int treeSize = 100;
 
     /***
      * Default constructor for Base Nodes
@@ -59,7 +59,7 @@ public class BaseNode<T extends Comparable<T>> extends Node
     {
         int stat = super.NewStat(cnt);
 
-        if(data.size() >= MAX_SIZE)
+        if(data.size() >= treeSize)
         {
             stat += MAX_SIZE_CNTB;
         }
