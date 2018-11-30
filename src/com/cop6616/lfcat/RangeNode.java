@@ -23,16 +23,25 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         type = NodeType.RANGE;
     }
 
+    /***
+     * Range node constructor that takes in a node with data, a rage and a result storage container
+     * @param _node Node to copy base values from to populate the range node
+     * @param _lokey low value of the range
+     * @param _hikey high value of the range
+     * @param _str storage container for the result
+     */
     public RangeNode(Node _node, int _lokey, int _hikey, ResultStorage<T> _str)
     {
         type = NodeType.RANGE;
 
+        //Copy basic parent and statistic values
         parent = _node.parent;
         statistic = _node.statistic;
 
         if (_node.type == NodeType.RANGE || _node.type == NodeType.BASE ||
                 _node.type == NodeType.JOIN_MAIN || _node.type == NodeType.JOIN_NEIGHBOR)
         {
+            //Copy the given nodes data if available
             BaseNode<T> bn = (BaseNode<T>) _node;
             data = new AVLTree<>(bn.data);
         }
@@ -43,12 +52,20 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         storage = _str;
     }
 
+    /***
+     * The result storage of a range node is only set when the full operation is completed and all range nodes are joined
+     * @return
+     */
     public boolean IsReplaceable()
     {
         return storage.result.get() != null;
     }
 
 
+    /***
+     * Other operations fail the CAS and want to help can attempt to help complete the ongoing range operation
+     * @param root
+     */
     public void HelpIfNeeded(AtomicReference<Node> root)
     {
         if (this.storage.result.get() == null)
@@ -58,7 +75,9 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
     }
 
     @Override
-    // Calculates and sets the new contention statistic for a node.
+    /***
+     * New stat update that takes into account the range contribution to help push low contention adaptation
+     */
     public int NewStat(ContentionInfo cnt)
     {
         int stat = statistic;
@@ -80,6 +99,11 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         return stat;
     }
 
+    /***
+     * Stack operation to backup stack
+     * @param orig
+     * @param target
+     */
     public static void CopyStateTo(Deque<Node> orig, Deque<Node> target)
     {
         target.clear();
@@ -92,12 +116,26 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         }
     }
 
+    /***
+     * Replaces the top of the stack. Primarily used to replace a node with the resulting range node.
+     * @param s
+     * @param n
+     */
     public static void ReplaceTop(Deque<Node> s, Node n)
     {
         s.pop();
         s.push(n);
     }
 
+    /***
+     * Starts the range search by creating stack values to be kept track of throughout the operation.
+     * @param root root of search
+     * @param lowKey low key in range
+     * @param highKey high key in range
+     * @param rs result storage passed in as part of a continuing range operation
+     * @param <T>
+     * @return
+     */
     public static <T extends Comparable<T>> AVLTree<T> AllInRange(AtomicReference<Node> root, int lowKey, int highKey, ResultStorage<T> rs)
     {
         Deque<Node> s = new ArrayDeque<Node>();
@@ -107,6 +145,19 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         return LowInRange(root, lowKey, highKey, s, backup_s, done, rs); // Equates to find_first on line 168 of paper
     }
 
+    /***
+     * Searches for the lowest node in the range, replaces it with a range node copy, and kicks of the search for the
+     * continuing range.
+     * @param root root of search
+     * @param lowKey low key in range
+     * @param highKey high key in range
+     * @param s stack for current traversal
+     * @param backup_s back up of current traversal in case operation currently fails
+     * @param done keeps track of finished nodes.
+     * @param rs result storage passed in as part of a continuing range operation
+     * @param <T>
+     * @return
+     */
     public static <T extends Comparable<T>> AVLTree<T> LowInRange(AtomicReference<Node> root, int lowKey, int highKey,
                                                                   Deque<Node> s, Deque<Node> backup_s, Deque<Node> done, ResultStorage<T> rs)
     {
@@ -171,6 +222,18 @@ public class RangeNode<T extends Comparable<T>> extends BaseNode<T>
         }
     }
 
+    /***
+     * Continues the search from the stack found in the low key search
+     * @param root root of search
+     * @param lowKey low key in range
+     * @param highKey high key in range
+     * @param s stack for current traversal
+     * @param backup_s back up of current traversal in case operation currently fails
+     * @param done keeps track of finished nodes.
+     * @param rs result storage passed in as part of a continuing range operation
+     * @param <T>
+     * @return
+     */
     public static <T extends Comparable<T>> AVLTree<T> RestInRange(AtomicReference<Node> root, int lowKey, int highKey, Node b,
                                                                    Deque<Node> s, Deque<Node> backup_s, Deque<Node> done,
                                                                    ResultStorage<T> rs)

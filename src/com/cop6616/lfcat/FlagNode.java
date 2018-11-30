@@ -2,6 +2,9 @@ package com.cop6616.lfcat;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/***
+ * Flag nodes used to denote ongoing, finished, and aborted operations
+ */
 public class FlagNode extends Node
 {
     // Static Node Flags for the status of the operations.
@@ -19,6 +22,7 @@ public class FlagNode extends Node
         type = NodeType.FLAG;
     }
 
+    //Always replaceable
     public boolean IsReplaceable ()
     {
         return true;

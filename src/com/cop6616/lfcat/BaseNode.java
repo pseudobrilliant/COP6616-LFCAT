@@ -222,6 +222,9 @@ public class BaseNode<T extends Comparable<T>> extends Node
         }
     }
 
+    /***
+     * Prints the base node metadata and avl tree data
+     */
     public void Print()
     {
         int size = data.size();
