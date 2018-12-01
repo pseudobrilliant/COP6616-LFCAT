@@ -269,7 +269,7 @@ assume the conflicts will not occur within the methods and must restart transact
 
 ![alt text](https://github.com/ucfblythe/COP6616-LFCAT/blob/master/images/STM_throughput.png "STM Throughput")
 
-##Conclusion
+## Conclusion
 This report presents an overview of the Lock-Free Contention Adaptive Search Tree along with an implementation in Java. 
 The code is accessible at the repository linked in the abstract. The performance of our implementation was tested under 
 varying operational loads and levels of concurrency. Our implementation comes close to the performance reported in the 
