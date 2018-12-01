@@ -145,7 +145,7 @@ join-neighbor node from the targets parent. The join-main node is no longer a lo
 but to describe it's logical removal to other operations the join must logically mark the node as completed by atomically 
 setting one of it's references to a static 'done' node.
 
-##Implementation
+## Implementation
 
 Our implementation follows along with the basic concepts of the LFCAT structure as described in the original lfcat paper.
 However, unlike the C based pseudo-code provided by the authors, our implementation attempts to provide an object-oriented 
