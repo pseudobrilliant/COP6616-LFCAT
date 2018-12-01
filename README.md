@@ -32,7 +32,7 @@ To build or run unit tests you must have the following libraries:
 * xChart 3.5.2
 * JUnit 5.2
 
-### Structure Description
+## Structure Description
 
 To better understand the problem of contention in the key-value model, consider a binary tree 
 holding a set of keys in the leaf nodes. When a static synchronization strategy with a fixed 
