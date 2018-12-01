@@ -205,8 +205,9 @@ size of the AVL trees while using the real-world distribution. Both of these exp
 on the adaptability of the LFCAT data structure. All tests were performed on an Intel i7-8700K with 6 cores and 12 threads. 
 The system has 12 MB of L3 cache and 16 GB of RAM.
 
-##Results
+## Results
 
+### Results Over Number of Threads
 THe figure below shows the performance of our LFCAT implementation under the various loads described above. The high conflict 
 load performs the worst since this load receives the most contention. All loads are ordered based on the percentage of range 
 queries with higher percentages resulting in lower throughput. This is due to the large amounts of contention that occur when 
@@ -217,6 +218,7 @@ as context switching occurs when more than 12 threads are utilized.
 
 ![alt text](https://github.com/ucfblythe/COP6616-LFCAT/blob/master/images/LFCAT_throughput.png "LFCAT Throughput")
 
+### Results Over AVL Tree Size
 The performance of our LFCAT implementation performs slightly worse than the original author's implementation under similar 
 conditions and loads. These differences in performance can be attributed to the use of Java in our implementation instead of 
 C in the original paper. Our implementation sacrifices better performance for automatic memory management via garbage collection 
@@ -235,7 +237,8 @@ range increases, the amount of time for each range operation increases proportio
 
 
 ![alt text](https://github.com/ucfblythe/COP6616-LFCAT/blob/master/images/Range_sizes.png "Range Sizes")
- 
+
+### Results Over Max Range Size
 Another experiment was run which limited the maximum AVL tree size stored in the leaf nodes of the LFCAT. This test was 
 performed because a significant degradation in throughput was observed when the AVL tree sizes were allowed to increase 
 unbounded. Figure \ref{fig:AVL} quantifies this observation. Maximum AVL tree sizes of 10, 100, 500, 1000, and 5000 were 
@@ -253,6 +256,7 @@ in O(log n) time.
 
 ![alt text](https://github.com/ucfblythe/COP6616-LFCAT/blob/master/images/AVL_sizes.png "AVL Sizes")
 
+### Results Over STM Implementation
 The figure below shows the performance of a comparable binary search tree implemented using the Deuce Software Transactional 
 Memory Library (Deuce-STM). Our Deuce-STM implementation is essentially a binary search tree with insert, remove, contains, 
 and range query support. It does not provide any of the contention adaptation methods described above, but rather lets the 
