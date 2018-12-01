@@ -20,7 +20,15 @@ public class LFCATTestThread implements Runnable
     public static boolean start = false;
 
 
-
+    /***
+     * Test constructor that takes in an lfcat, a max range for queries, and an operation distribution.
+     * The constructor generates a list of randomly selected actions that still conform to the distributions.
+     * As a runnable action the class runs all the actions pre-selected by the constructor in order.
+     * @param _threadops
+     * @param _lfcat
+     * @param range
+     * @param targetRatios
+     */
     LFCATTestThread(int _threadops, LFCAT<Integer> _lfcat, int range, Ratio targetRatios)
     {
         threadops = _threadops;
